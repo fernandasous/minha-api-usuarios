@@ -8,7 +8,15 @@ const options = {
       version: "1.0.0",
     },
   },
-  apis: ["./app.js"],
-}
+
+  servers: [
+      {
+        url: "https://minha-api-usuarios-yu2h.onrender.com",
+        description: "Servidor de Produção (Render)",
+      },
+    ],
+
+  apis: ["./app.js"]
+  };
 
 module.exports = swaggerJSDoc(options)
