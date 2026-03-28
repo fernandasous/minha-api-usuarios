@@ -8,7 +8,6 @@ const path = require('path'); // importar o módulo path
 // express: entregar os arquivos da pasta atual
 app.use(express.static(path.join(__dirname, '.')));
 
-// rota para entregar o index.html na página inicial
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
