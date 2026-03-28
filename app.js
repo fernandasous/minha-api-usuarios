@@ -33,7 +33,8 @@ app.use (express.json())
 
 app.get("/", (req, res) => {
     res.send("API rodando!")
-})
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 /**
  * @openapi

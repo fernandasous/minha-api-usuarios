@@ -11,3 +11,4 @@ INSERT INTO users (`id`, `nome`, `idade`) VALUES (NULL, 'João', 25);
 INSERT INTO users (`id`, `nome`, `idade`) VALUES (NULL, 'Maria', 30);
 INSERT INTO users (`id`, `nome`, `idade`) VALUES (NULL, 'Pedro', 22);
 SELECT * FROM users;
+

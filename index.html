@@ -2,149 +2,68 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha API de Usuários</title>
+    <title>Estudo de API - Cadastro</title>
     <style>
-        /* CSS Simples para organizar */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        #lista-usuarios {
-            list-style-type: none;
-            padding: 0;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .usuario-card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .usuario-info h3 {
-            margin: 0 0 5px 0;
-            color: #555;
-        }
-
-        .usuario-info p {
-            margin: 0;
-            color: #777;
-            font-size: 0.9em;
-        }
-
-        .status-carregando {
-            color: #888;
-            font-style: italic;
-        }
-
-        .status-erro {
-            color: #d9534f;
-            font-weight: bold;
-        }
+        body { font-family: 'Segoe UI', sans-serif; max-width: 500px; margin: 40px auto; background: #f4f7f6; padding: 20px; }
+        .box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h2 { color: #333; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #357abd; }
+        .user-item { background: #fafafa; padding: 12px; margin-top: 10px; border-radius: 5px; border-left: 4px solid #4a90e2; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <h1>Lista de Usuários da API</h1>
-    
-    <p id="status" class="status-carregando">Carregando usuários...</p>
+<div class="box">
+    <h2>➕ Inserir Usuário</h2>
+    <form id="formUser">
+        <input type="text" id="nome" placeholder="Nome completo" required>
+        <input type="number" id="idade" placeholder="Idade" required>
+        <button type="submit">Cadastrar na Database</button>
+    </form>
 
-    <ul id="lista-usuarios"></ul>
+    <h2>📋 Usuários na Database</h2>
+    <div id="lista"></div>
+</div>
 
-    <script>
-        // --- CONFIGURAÇÃO ---
-        // COLOQUE A URL DA SUA API AQUI (Certifique-se de que termina com a rota que lista usuários, ex: /usuarios)
-        const api_url = "https://minha-api-usuarios-yu2h.onrender.com/usuarios"; 
+<script>
+    const API_URL = "/users"; // Ajustado para sua rota /users
 
-        // --- FUNÇÃO PARA BUSCAR E MOSTRAR DADOS ---
-        async function buscarUsuarios() {
-            const statusElemento = document.getElementById('status');
-            const listaElemento = document.getElementById('lista-usuarios');
-
-            try {
-                // 1. Faz a requisição para a API
-                const resposta = await fetch(api_url);
-
-                // 2. Verifica se a resposta foi bem-sucedida (status 200)
-                if (!resposta.ok) {
-                    throw new Error(`Erro na API: ${resposta.status}`);
-                }
-
-                // 3. Converte a resposta bruta em JSON (dados organizados)
-                const usuarios = await resposta.json();
-
-                // 4. Limpa as mensagens de status e a lista
-                statusElemento.textContent = '';
-                listaElemento.innerHTML = '';
-
-                // 5. Verifica se há usuários
-                if (usuarios.length === 0) {
-                    statusElemento.textContent = "Nenhum usuário cadastrado.";
-                    return;
-                }
-
-                // 6. Itera sobre cada usuário e cria o HTML para ele
-                usuarios.forEach(usuario => {
-                    // Cria os elementos do card
-                    const li = document.createElement('li');
-                    li.className = 'usuario-card';
-
-                    const divInfo = document.createElement('div');
-                    divInfo.className = 'usuario-info';
-
-                    // --- AJUSTE AQUI BASEADO NOS SEUS DADOS ---
-                    // Se sua API usa 'nome' e 'email', deixe como está.
-                    // Se usa 'name' e 'email_address', mude para usuario.name e usuario.email_address
-                    const h3Nome = document.createElement('h3');
-                    h3Nome.textContent = usuario.nome || usuario.name || "Nome não disponível";
-
-                    const pEmail = document.createElement('p');
-                    pEmail.textContent = usuario.email || "E-mail não disponível";
-                    // ----------------------------------------
-
-                    const spanId = document.createElement('span');
-                    spanId.style.color = '#bbb';
-                    spanId.style.fontSize = '0.8em';
-                    spanId.textContent = `#${usuario.id}`;
-
-                    // Monta o card
-                    divInfo.appendChild(h3Nome);
-                    divInfo.appendChild(pEmail);
-                    li.appendChild(divInfo);
-                    li.appendChild(spanId);
-
-                    // Adiciona o card à lista principal
-                    listaElemento.appendChild(li);
-                });
-
-            } catch (erro) {
-                // Mostra mensagem de erro se algo falhar
-                statusElemento.textContent = `Falha ao carregar usuários. Verifique se a API está online e se os dados estão corretos. (Erro: ${erro.message})`;
-                statusElemento.className = 'status-erro';
-                console.error("Erro completo:", erro);
-            }
+    // Função para puxar usuários
+    async function carregar() {
+        try {
+            const res = await fetch(API_URL);
+            const dados = await res.json();
+            const lista = document.getElementById('lista');
+            lista.innerHTML = dados.map(u => `
+                <div class="user-item">
+                    <strong>${u.nome}</strong>, ${u.idade} anos
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error("Erro ao carregar:", err);
         }
+    }
 
-        // Chama a função ao carregar a página
-        buscarUsuarios();
+    // Função para inserir usuário
+    document.getElementById('formUser').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome').value;
+        const idade = parseInt(document.getElementById('idade').value);
 
-    </script>
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, idade })
+        });
+
+        document.getElementById('formUser').reset();
+        carregar();
+    });
+
+    carregar();
+</script>
+
 </body>
 </html>
