@@ -98,6 +98,8 @@ const swaggerSpec = require("./swagger")
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.listen(process.env.PORT, () => {
-    console.log ("Servidor está rodando na porta", process.env.PORT)
-})
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Servidor está rodando na porta", PORT);
+});
