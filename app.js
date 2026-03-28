@@ -8,7 +8,7 @@ const path = require('path'); // importar o módulo path
 // express: entregar os arquivos da pasta atual
 app.use(express.static(path.join(__dirname, '.')));
 
-// Rota para entregar o index.html na página inicial
+// rota para entregar o index.html na página inicial
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -32,7 +32,7 @@ app.use (express.json())
  */
 
 app.get("/", (req, res) => {
-    res.send("API rodando!")
+    res.send("API rodando!"),
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
