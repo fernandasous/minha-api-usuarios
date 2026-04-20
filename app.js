@@ -4,6 +4,7 @@ const express = require("express")
 const app = express()
 
 const path = require('path'); // importar o módulo path
+const jwt = require ('jsonwebtoken');
 
 // express: entregar os arquivos da pasta atual
 app.use(express.static(path.join(__dirname, '.')));
@@ -98,14 +99,34 @@ app.post ("/users", (req, res) => {
             console.error(err) 
             return res.status(500).json({erro: "Erro ao inserir usuário no banco"})
         }
+
+        const token = jwt.sign({ userId: novoId}, processo.env.JWT_SECRET, { expiresIn: '24h' }) 
         
         res.status(201).json({
             mensagem: "Usuário inserido com sucesso!",
-            id: result.insertId
+            id: novoId,
+            token: token
         })
     })
     })
    
+ app.delete ("/users/:id", (req, res) => {
+    const idToDelete = req.params.id;
+    const token = req.headers['authorization'];
+
+    if (!token) return res.status(401).send("Acesso negado, token não foi fornecido");
+    
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) return res.status(403).send("Token de verificação é inválido ou expirado. Não foi possível deletar registro do usuário.")});
+
+        if (decoded.userId != idToDelete) return res.status(403).send("Você não tem permissão para deletar esse registro");
+
+        db.query("DELETE FROM users WHERE id = ?", [idToDelete], (err, result) => {
+            if (err) return res.status(500).send("Ocorreu um erro ao deletar o usuário da database.");
+            res.send("Registro excluído!");
+    });
+})
+    
 const swaggerUi = require("swagger-ui-express")
 const swaggerSpec = require("./swagger")
 
@@ -114,5 +135,5 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Servidor está rodando na porta", PORT);
+  console.log("Servidor está rodando na porta", PORT)
 });

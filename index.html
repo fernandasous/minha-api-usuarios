@@ -16,21 +16,20 @@
 <body>
 
 <div class="box">
-    <h2>➕ Inserir Usuário</h2>
+    <h2>Inserir Usuário</h2>
     <form id="formUser">
         <input type="text" id="nome" placeholder="Nome completo" required>
         <input type="number" id="idade" placeholder="Idade" required>
         <button type="submit">Cadastrar na Database</button>
     </form>
 
-    <h2>📋 Usuários na Database</h2>
+    <h2>Usuários na Database</h2>
     <div id="lista"></div>
 </div>
 
 <script>
     const API_URL = "/users"; 
 
-    // Função para puxar usuários
     async function carregar() {
         try {
             const res = await fetch(API_URL);
@@ -38,6 +37,7 @@
             const lista = document.getElementById('lista');
             lista.innerHTML = dados.map(u => `
                 <div class="user-item">
+                    <input type="checkbox" class="user-selector" value="${u.id}">
                     <strong>${u.nome}</strong>, ${u.idade} anos
                 </div>
             `).join('');
@@ -61,6 +61,19 @@
         document.getElementById('formUser').reset();
         carregar();
     });
+
+document.getElementById('btnDelete').addEventListener('click', async () => {
+    const selected = document.querySelectorAll('.user-selector:checked');
+
+    for (let cb of selected) {
+        const id = cb.value;
+        const token = localStorage.getItem(`token_user_${id}`);
+
+        await fetch(`${API_URL}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': token }
+        });
+    }})
 
     carregar();
 </script>
