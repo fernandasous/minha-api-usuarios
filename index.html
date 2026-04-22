@@ -26,7 +26,7 @@
     <h2>Usuários na Database</h2>
     <div id="lista"></div>
 
-    <button id="btnDelete">Deletar da Database</button>
+    <button type="button" id="btnDelete">Deletar da Database</button>
 </div>
 
 <script>
@@ -64,20 +64,26 @@
         carregar();
     });
 
-document.getElementById('btnDelete').addEventListener('click', async () => {
-    const selected = document.querySelectorAll('.user-selector:checked');
+    document.getElementById('btnDelete').addEventListener('click', async () => {
+        const selected = document.querySelectorAll('.user-selector:checked');
 
-    for (let cb of selected) {
-        const id = cb.value;
-        const token = localStorage.getItem(`token_user_${id}`);
+        if (selected.length === 0) {
+            alert ("Selecione ao menos um registro para excluir.");
+            return;
+        }
 
-        await fetch(`${API_URL}/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': token }
-        });
-    }})
+        for (let cb of selected) {
+            const id = cb.value;
+            const token = localStorage.getItem(`token_user_${id}`);
 
-    carregar();
+            await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': token }
+            });
+        }
+
+        carregar();
+    });
 </script>
 
 </body>
