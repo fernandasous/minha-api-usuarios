@@ -100,7 +100,8 @@ app.post ("/users", (req, res) => {
             return res.status(500).json({erro: "Erro ao inserir usuário no banco"})
         }
 
-        const token = jwt.sign({ userId: novoId}, processo.env.JWT_SECRET, { expiresIn: '24h' }) 
+        const novoId = result.insertId;
+        const token = jwt.sign({ userId: novoId }, process.env.JWT_SECRET, { expiresIn: '24h' }) 
         
         res.status(201).json({
             mensagem: "Usuário inserido com sucesso!",

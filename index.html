@@ -57,11 +57,20 @@
         const nome = document.getElementById('nome').value;
         const idade = parseInt(document.getElementById('idade').value);
 
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome, idade })
         });
+
+        const data = await res.json();
+        console.log("Usuário criado:", data);
+
+        // Salvar o token no localStorage se a resposta contiver
+        if (data.token) {
+            localStorage.setItem(`token_user_${data.id}`, data.token);
+            console.log("Token salvo para usuário", data.id);
+        }
 
         document.getElementById('formUser').reset();
         carregar();
