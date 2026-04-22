@@ -36,6 +36,7 @@
         try {
             const res = await fetch(API_URL);
             const dados = await res.json();
+            console.log("Dados recebidos:", dados);
             const lista = document.getElementById('lista');
             lista.innerHTML = dados.map(u => `
                 <div class="user-item">
