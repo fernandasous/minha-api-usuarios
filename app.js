@@ -16,7 +16,11 @@ app.get('/', (req, res) => {
 const cors = require('cors');
 app.use(cors());
 
+const PORT = process.env.PORT || 3000;
 
+app.listen(PORT, () => {
+  console.log("Servidor está rodando na porta", PORT)
+});
 app.use (express.json())
 
 /**
@@ -47,14 +51,14 @@ app.get("/", (req, res) => {
  *       500:
  *         description: Erro no servidor
  */
-app.get ("/users", (req, res) => {
-    db.query("SELECT * FROM users", (err, results) => {
-        if (err) {
-            return res.status(500).json({erro: err.message})
-        }
-        res.json(results)
-    })
-})
+app.get ("/users", async (req, res) => {
+    try {
+    const result = await db.query("SELECT * FROM users");
+    res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({erro: err.message});
+    }
+    });
 
 /**
  * @openapi
@@ -86,30 +90,28 @@ app.get ("/users", (req, res) => {
  *         description: Erro no servidor
  */
 
-app.post ("/users", (req, res) => {
-    const { nome, idade } = req.body 
+app.post ("/users", async (req, res) => {
+    const { nome, idade } = req.body;
 
        if (!nome || !idade) {
         return res.status(400).json({ erro: "nome e idade são dados obrigatórios para inserção do usuário"})
     }
-    const sql = "INSERT INTO users (nome, idade) VALUES (?, ?)"
-       
-    db.query(sql, [nome, idade], (err, result) => {
-        if (err) {
-            console.error(err) 
-            return res.status(500).json({erro: "Erro ao inserir usuário no banco"})
-        }
+    
+    try {
+        const sql = await db.query ("INSERT INTO users (nome, idade) VALUES ($1, $2) RETURNING id", [nome, idade]);
 
-        const novoId = result.insertId;
         const token = jwt.sign({ userId: novoId }, process.env.JWT_SECRET, { expiresIn: '24h' }) 
-        
-        res.status(201).json({
-            mensagem: "Usuário inserido com sucesso!",
-            id: novoId,
+
+        res.status(2021).json({
+            return: "Usuário inserido na database",
+            id: result.rows[0].id,
             token: token
-        })
-    })
-    })
+        });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+       
+    });
    
  app.delete ("/users/:id", (req, res) => {
     const idToDelete = req.params.id;
@@ -118,23 +120,27 @@ app.post ("/users", (req, res) => {
     if (!token) return res.status(401).send("Acesso negado, token não foi fornecido");
     
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) return res.status(403).send("Token de verificação é inválido ou expirado. Não foi possível deletar registro do usuário.")});
+        if (err) {
+            return res.status(403).send("Token de verificação é inválido ou expirado. Não foi possível deletar registro do usuário.");
+        }})
 
-        if (decoded.userId != idToDelete) return res.status(403).send("Você não tem permissão para deletar esse registro");
+        if (decoded.userId != idToDelete) {
+            return res.status(403).send("Você não tem permissão para deletar esse registro");
+        }
 
-        db.query("DELETE FROM users WHERE id = ?", [idToDelete], (err, result) => {
-            if (err) return res.status(500).send("Ocorreu um erro ao deletar o usuário da database.");
+        const query = "DELETE FROM users WHERE id = $1";
+
+        db.query(query, [idToDelete], (err, result) => {
+            if (err) {
+                return res.status(500).send("Ocorreu um erro ao deletar o usuário da database.");
+            }
             res.send("Registro excluído!");
+        });
     });
-})
+
     
 const swaggerUi = require("swagger-ui-express")
 const swaggerSpec = require("./swagger")
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Servidor está rodando na porta", PORT)
-});
