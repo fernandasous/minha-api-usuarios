@@ -9,6 +9,17 @@ const jwt = require ('jsonwebtoken');
 // express: entregar os arquivos da pasta atual
 app.use(express.static(path.join(__dirname, '.')));
 
+/**
+ * @openapi
+ * /:
+ *   get:
+ *     summary: Verifica se a API está rodando
+ *     responses:
+ *       200:
+ *         description: API está rodando normalmente.
+ *       500:
+ *         description: Erro no servidor.
+ */
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -23,22 +34,7 @@ app.listen(PORT, () => {
 });
 app.use (express.json())
 
-/**
- * @openapi
- * /:
- *   get:
- *     summary: Verifica se a API está rodando
- *     responses:
- *       200:
- *         description: API está rodando normalmente.
- *       500:
- *         description: Erro no servidor.
- */
 
-app.get("/", (req, res) => {
-    res.send("API rodando!"),
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
 
 /**
  * @openapi
@@ -99,12 +95,12 @@ app.post ("/users", async (req, res) => {
     
     try {
         const sql = await db.query ("INSERT INTO users (nome, idade) VALUES ($1, $2) RETURNING id", [nome, idade]);
-
+        let novoId = sql.rows[0].id;
         const token = jwt.sign({ userId: novoId }, process.env.JWT_SECRET, { expiresIn: '24h' }) 
 
-        res.status(2021).json({
+        res.status(201).json({
             return: "Usuário inserido na database",
-            id: result.rows[0].id,
+            id: novoId,
             token: token
         });
     } catch (err) {
@@ -122,7 +118,7 @@ app.post ("/users", async (req, res) => {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
             return res.status(403).send("Token de verificação é inválido ou expirado. Não foi possível deletar registro do usuário.");
-        }})
+        }
 
         if (decoded.userId != idToDelete) {
             return res.status(403).send("Você não tem permissão para deletar esse registro");
@@ -137,6 +133,7 @@ app.post ("/users", async (req, res) => {
             res.send("Registro excluído!");
         });
     });
+});   
 
     
 const swaggerUi = require("swagger-ui-express")
