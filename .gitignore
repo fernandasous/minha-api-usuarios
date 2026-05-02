@@ -1,3 +1,5 @@
 .env
 *.sql
+tmp_fetch.js
+tmp_fetch_out.txt
 
