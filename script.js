@@ -14,6 +14,11 @@ const alertbox = document.getElementById("alert");
     async function carregar() {
         try {
             const res = await fetch(API_URL);
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                showErr(errData.erro || `Erro ao carregar usuários: ${res.status}`);
+                return;
+            }
             const dados = await res.json();
             console.log("Dados recebidos:", dados);
             const lista = document.getElementById('lista');

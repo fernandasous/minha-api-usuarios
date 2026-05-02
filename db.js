@@ -1,16 +1,21 @@
 const postg = require("pg");
 require("dotenv").config();
 
-const db = new postg.Client({
+const connectionString = process.env.DATABASE_URL;
+
+const dbConfig = connectionString ? {
+  connectionString,
+  ssl: { rejectUnauthorized: false }
+} : {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME, 
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+  database: process.env.DB_NAME,
+  ssl: { rejectUnauthorized: false }
+};
+
+const db = new postg.Client(dbConfig);
 
 // teste de conexao
 db.connect((err) => {
