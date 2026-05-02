@@ -9,8 +9,8 @@ app.get("/", (req, res) => {
 
 app.get("/users", (req, res) => {
   res.json([
-    { id: 1, nome: "Ana" },
-    { id: 2, nome: "João" }
+    { id: 1, nome: "x" },
+    { id: 2, nome: "y" }
   ])
 })
 
